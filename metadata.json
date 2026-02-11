@@ -1,0 +1,9 @@
+{
+  "name": "Voraztec-SystemPro",
+  "description": "Uma plataforma SaaS multi-tenant robusta para gestão de ordens de serviço, clientes e técnicos de campo.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}

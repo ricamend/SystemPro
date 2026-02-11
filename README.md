@@ -1,11 +1,34 @@
-<div align="center">
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+# ServiçoPro - SaaS de Gestão de Campo
 
-  <h1>Built with AI Studio</h2>
+O **ServiçoPro** é uma plataforma SaaS multi-tenant robusta projetada para empresas de manutenção, instalação e serviços de campo. Ele combina gestão operacional clássica com o poder da Inteligência Artificial (Gemini API).
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+## 🚀 Principais Funcionalidades
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+- **Dashboard BI**: Visão em tempo real de produtividade e faturamento.
+- **Gestão de OS**: Fluxo completo desde a abertura até o laudo final com assinatura digital.
+- **IA Copilot**: Diagnóstico técnico, resumo de chats e análise de evidências por visão computacional.
+- **Monitoramento de Frota**: Rastreamento GPS de técnicos e otimização de rotas.
+- **Controle de Ativos**: Gestão por QR Code e telemetria de equipamentos industriais.
+- **Estoque Inteligente**: Reconciliação automatizada entre Centro de Distribuição e unidades técnicas móveis.
 
-</div>
+## 🛠️ Tecnologias
+
+- **Frontend**: React 19 (ESM), Tailwind CSS.
+- **Gráficos**: Recharts.
+- **Mapas**: Leaflet.
+- **IA**: Google Gemini 2.5/3.0.
+- **Relatórios**: jsPDF e QR Code generation.
+
+## 📦 Como usar
+
+Como este projeto utiliza **Import Maps**, ele não requer um bundler pesado para rodar. Basta abrir o `index.html` em um servidor local.
+
+Para sincronizar com o GitHub:
+1. Inicialize um repositório: `git init`
+2. Adicione os arquivos: `git add .`
+3. Commit: `git commit -m "feat: initial release"`
+4. Push para seu repo remoto.
+
+---
+*Desenvolvido com foco em estética, performance e inteligência.*

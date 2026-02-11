@@ -1,0 +1,27 @@
+
+{
+  "name": "servico-pro-saas",
+  "version": "1.0.0",
+  "description": "Plataforma SaaS Multi-tenant para Gestão de Ordens de Serviço com IA.",
+  "main": "index.tsx",
+  "dependencies": {
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "lucide-react": "^0.563.0",
+    "recharts": "^3.7.0",
+    "react-router-dom": "^7.13.0",
+    "leaflet": "^1.9.4",
+    "jspdf": "^2.5.1",
+    "qrcode": "^1.5.3",
+    "@google/genai": "^1.39.0"
+  },
+  "keywords": [
+    "saas",
+    "field-service",
+    "react",
+    "ai",
+    "management"
+  ],
+  "author": "ServiçoPro Team",
+  "license": "MIT"
+}
