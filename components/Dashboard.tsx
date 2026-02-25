@@ -22,12 +22,15 @@ import {
   Zap,
   ArrowRight,
   History,
-  Activity
+  Activity,
+  AlertTriangle,
+  Package
 } from 'lucide-react';
 import { aiService } from '../services/aiService';
 import { logService } from '../services/logService';
 import { AuditLog } from '../types';
 import MapWidget from './MapWidget';
+import { useNavigate } from 'react-router-dom';
 
 const dataPerformance = [
   { name: 'Seg', os: 4 },
@@ -37,13 +40,6 @@ const dataPerformance = [
   { name: 'Sex', os: 9 },
   { name: 'Sáb', os: 3 },
   { name: 'Dom', os: 1 },
-];
-
-const dataStatus = [
-  { name: 'Abertas', value: 30, color: '#3b82f6' },
-  { name: 'Em Andamento', value: 45, color: '#f59e0b' },
-  { name: 'Concluídas', value: 120, color: '#10b981' },
-  { name: 'Canceladas', value: 15, color: '#ef4444' },
 ];
 
 const StatCard = ({ title, value, growth, icon: Icon, color }: any) => (
@@ -86,9 +82,11 @@ const StatusBadge = ({ status }: { status: string }) => {
 };
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [insight, setInsight] = useState<string>("Carregando insights...");
   const [isLoadingInsight, setIsLoadingInsight] = useState(true);
   const [recentLogs, setRecentLogs] = useState<AuditLog[]>([]);
+  const [criticalInventoryCount, setCriticalInventoryCount] = useState(0);
 
   useEffect(() => {
     const fetchInsights = async () => {
@@ -103,9 +101,16 @@ const Dashboard: React.FC = () => {
     };
     fetchInsights();
     
-    // Carregar os últimos 5 logs de auditoria
     const allLogs = logService.getAllLogs();
     setRecentLogs(allLogs.slice(0, 5));
+
+    // Verificar estoque crítico para o Dashboard
+    const savedInv = localStorage.getItem('servicopro_inventory_data');
+    if (savedInv) {
+      const products = JSON.parse(savedInv);
+      const count = products.filter((p:any) => p.stock <= p.minStock).length;
+      setCriticalInventoryCount(count);
+    }
   }, []);
 
   return (
@@ -156,44 +161,49 @@ const Dashboard: React.FC = () => {
           <MapWidget />
         </div>
         
-        {/* Novo Widget de Auditoria em Tempo Real */}
         <div className="bg-white p-6 rounded-[32px] border border-gray-100 shadow-sm flex flex-col">
           <div className="flex items-center justify-between mb-6">
             <h3 className="font-black text-gray-800 text-xs uppercase tracking-[0.2em] flex items-center gap-2">
-              <History className="w-4 h-4 text-blue-600" /> Atividade Recente
+              <Activity className="w-4 h-4 text-blue-600" /> Ações Rápidas
             </h3>
-            <button className="text-[10px] font-black text-blue-600 uppercase hover:underline">Ver Todos</button>
           </div>
           
-          <div className="flex-1 space-y-6">
-            {recentLogs.length > 0 ? recentLogs.map((log) => (
-              <div key={log.id} className="flex gap-4 relative group">
-                <div className="relative z-10 w-8 h-8 rounded-xl bg-gray-50 flex items-center justify-center shrink-0 border border-gray-100 group-hover:bg-blue-50 transition-colors">
-                  {log.type === 'status' && <Activity className="w-3.5 h-3.5 text-amber-500" />}
-                  {log.type === 'edit' && <Zap className="w-3.5 h-3.5 text-blue-500" />}
-                  {log.type === 'comment' && <ArrowRight className="w-3.5 h-3.5 text-indigo-500" />}
-                  {log.type === 'system' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
-                </div>
-                <div className="space-y-0.5">
-                  <p className="text-[11px] font-black text-gray-900 leading-tight">{log.action}</p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[9px] font-bold text-gray-400 uppercase">{log.user_name.split(' ')[0]}</span>
-                    <span className="text-[9px] text-gray-300">•</span>
-                    <span className="text-[9px] font-medium text-gray-400">{new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+          <div className="flex-1 space-y-4">
+            {criticalInventoryCount > 0 && (
+              <button 
+                onClick={() => navigate('/estoque')}
+                className="w-full flex items-center justify-between p-5 bg-red-50 border border-red-100 rounded-[24px] group hover:shadow-lg transition-all animate-in slide-in-from-right-4"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-red-600 rounded-2xl text-white shadow-xl group-hover:scale-110 transition-transform">
+                    <Package className="w-5 h-5" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-xs font-black text-red-900 uppercase">Estoque Crítico</p>
+                    <p className="text-[10px] text-red-600 font-bold uppercase">{criticalInventoryCount} itens precisam de reposição</p>
                   </div>
                 </div>
-              </div>
-            )) : (
-              <div className="h-full flex flex-col items-center justify-center text-gray-300 gap-2 opacity-50">
-                <History className="w-8 h-8" />
-                <p className="text-[10px] font-black uppercase">Sem atividade recente</p>
-              </div>
+                <ArrowRight className="w-4 h-4 text-red-400 group-hover:translate-x-1 transition-transform" />
+              </button>
             )}
+
+            <div className="p-5 bg-gray-50 border border-gray-100 rounded-[24px] flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-blue-600 rounded-2xl text-white shadow-md">
+                   <Clock className="w-5 h-5" />
+                </div>
+                <div className="text-left">
+                  <p className="text-xs font-black text-gray-900 uppercase">4 OS Pendentes</p>
+                  <p className="text-[10px] text-gray-400 font-bold uppercase">Escalar técnicos agora</p>
+                </div>
+              </div>
+              <ArrowRight className="w-4 h-4 text-gray-300" />
+            </div>
           </div>
           
           <div className="mt-8 p-4 bg-blue-50 rounded-2xl border border-blue-100 flex items-center gap-3">
              <div className="p-2 bg-blue-600 rounded-lg text-white shadow-sm"><ShieldCircle className="w-4 h-4" /></div>
-             <p className="text-[10px] font-bold text-blue-800 leading-tight">Logs de auditoria protegidos contra edição.</p>
+             <p className="text-[10px] font-bold text-blue-800 leading-tight">Painel Operacional auditado e seguro.</p>
           </div>
         </div>
       </div>

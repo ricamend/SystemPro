@@ -57,6 +57,14 @@ class NotificationService {
     );
   }
 
+  notifyLowStock(productName: string, currentStock: number) {
+    return this.sendPush(
+      "Estoque Crítico ⚠️",
+      `O item "${productName}" está com apenas ${currentStock} unidades. Reposição necessária.`,
+      "warning"
+    );
+  }
+
   notifyUrgentAlerta(osId: string, message: string) {
     return this.sendPush(
       "ALERTA URGENTE 🚨",

@@ -21,6 +21,7 @@ import {
   Clock
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
+import { notificationService } from '../services/notificationService';
 
 const initialProducts = [
   { id: '1', name: 'Válvula Esfera 3/4', sku: 'HID-VAL-001', stock: 45, fieldStock: 15, minStock: 10, cost: 22.50, price: 45.00, category: 'Hidráulica' },
@@ -37,7 +38,6 @@ const Inventory: React.FC = () => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Migração: garante que SKUs existem nos dados salvos
         return parsed.length > 0 && parsed[0].sku ? parsed : initialProducts;
       } catch (e) {
         return initialProducts;
@@ -52,7 +52,14 @@ const Inventory: React.FC = () => {
 
   useEffect(() => {
     localStorage.setItem('servicopro_inventory_data', JSON.stringify(products));
-  }, [products]);
+    
+    // Verificação automática de estoque baixo ao carregar
+    const lowStockItems = products.filter((p: any) => p.stock <= p.minStock);
+    if (lowStockItems.length > 0 && activeTab === 'stock') {
+      const mostCritical = lowStockItems[0];
+      notificationService.notifyLowStock(mostCritical.name, mostCritical.stock);
+    }
+  }, [products, activeTab]);
 
   const pendingReturns = useMemo(() => {
     const saved = localStorage.getItem('servicopro_tech_data');
@@ -85,7 +92,6 @@ const Inventory: React.FC = () => {
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     if (targetTech) {
-      // 1. ATUALIZAÇÃO DO CD: Soma as devoluções aos saldos atuais
       setProducts((currentProducts: any) => {
         return currentProducts.map((p: any) => {
           const match = targetTech.items.find((ri: any) => ri.sku === p.sku);
@@ -100,7 +106,6 @@ const Inventory: React.FC = () => {
         });
       });
 
-      // 2. LIMPEZA DO TÉCNICO
       allTechs[techId] = { ...targetTech, items: [], assets: [], status: 'regular' };
       localStorage.setItem('servicopro_tech_data', JSON.stringify(allTechs));
     }
@@ -235,20 +240,33 @@ const Inventory: React.FC = () => {
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-gray-50">
-                            {filteredProducts.map((p: any) => (
-                              <tr key={p.id} className="group hover:bg-blue-50/30 transition-all">
-                                  <td className="px-8 py-6">
-                                    <div className="flex flex-col">
-                                       <span className="text-sm font-black text-gray-900">{p.name}</span>
-                                       <span className="text-[9px] font-mono text-gray-400 uppercase tracking-tighter">SKU: {p.sku}</span>
-                                    </div>
-                                  </td>
-                                  <td className="px-8 py-6 text-center font-black text-gray-900 bg-blue-50/5">{p.stock} un.</td>
-                                  <td className="px-8 py-6 text-center font-black text-amber-600 bg-amber-50/5">{p.fieldStock} un.</td>
-                                  <td className="px-8 py-6 text-right font-black text-gray-900">R$ {p.price.toFixed(2)}</td>
-                                  <td className="px-8 py-6 text-right"><button className="p-2 text-gray-300 hover:text-blue-600"><Edit2 className="w-4 h-4" /></button></td>
-                              </tr>
-                            ))}
+                            {filteredProducts.map((p: any) => {
+                              const isLowStock = p.stock <= p.minStock;
+                              return (
+                                <tr key={p.id} className={`group transition-all ${isLowStock ? 'bg-red-50/50' : 'hover:bg-blue-50/30'}`}>
+                                    <td className="px-8 py-6">
+                                      <div className="flex items-center gap-3">
+                                         <div className="flex flex-col">
+                                            <span className={`text-sm font-black ${isLowStock ? 'text-red-700' : 'text-gray-900'}`}>{p.name}</span>
+                                            <span className="text-[9px] font-mono text-gray-400 uppercase tracking-tighter">SKU: {p.sku}</span>
+                                         </div>
+                                         {isLowStock && (
+                                           <span className="bg-red-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-md animate-pulse uppercase">Reposição</span>
+                                         )}
+                                      </div>
+                                    </td>
+                                    <td className={`px-8 py-6 text-center font-black bg-blue-50/5 ${isLowStock ? 'text-red-600' : 'text-gray-900'}`}>
+                                      <div className="flex items-center justify-center gap-1">
+                                        {p.stock} un.
+                                        {isLowStock && <AlertTriangle className="w-3 h-3 text-red-500 animate-bounce" />}
+                                      </div>
+                                    </td>
+                                    <td className="px-8 py-6 text-center font-black text-amber-600 bg-amber-50/5">{p.fieldStock} un.</td>
+                                    <td className="px-8 py-6 text-right font-black text-gray-900">R$ {p.price.toFixed(2)}</td>
+                                    <td className="px-8 py-6 text-right"><button className="p-2 text-gray-300 hover:text-blue-600"><Edit2 className="w-4 h-4" /></button></td>
+                                </tr>
+                              );
+                            })}
                           </tbody>
                       </table>
                   </div>
@@ -287,6 +305,16 @@ const Inventory: React.FC = () => {
                   <div className="h-full flex items-center justify-center text-gray-300 text-[10px] font-black uppercase">Sem Dados</div>
                 )}
               </div>
+           </div>
+
+           <div className="bg-red-600 p-8 rounded-[40px] text-white shadow-2xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+              <AlertTriangle className="w-10 h-10 mb-6 text-red-200 animate-pulse" />
+              <h4 className="text-xl font-black mb-2">Itens Críticos</h4>
+              <p className="text-sm text-red-100 font-medium leading-relaxed mb-6">
+                Detectamos {products.filter((p:any) => p.stock <= p.minStock).length} itens abaixo da margem de segurança. Deseja gerar lista de compras automática?
+              </p>
+              <button className="w-full py-4 bg-white text-red-600 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-red-50 transition-all">Gerar Ordem de Compra</button>
            </div>
         </div>
       </div>

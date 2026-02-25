@@ -49,6 +49,9 @@ import LandingPage from './components/LandingPage';
 import Reports from './components/Reports';
 import Billing from './components/Billing';
 import TechMobileDashboard from './components/TechMobileDashboard';
+import TechAgenda from './components/TechAgenda';
+import TechProfile from './components/TechProfile';
+import TechPerformance from './components/TechPerformance';
 import NotificationCenter from './components/NotificationCenter';
 import ChecklistManager from './components/ChecklistManager';
 import CustomFieldConfig from './components/CustomFieldConfig';
@@ -69,38 +72,55 @@ import { Login, Register } from './components/Auth';
 import ServiceOrderForm from './components/ServiceOrderForm';
 import { UserRole } from './types';
 
-const TechBottomNav = ({ onPlus }: { onPlus: () => void }) => {
+type TechTab = 'home' | 'agenda' | 'performance' | 'profile';
+
+const TechBottomNav = ({ activeTab, onTabChange, onPlus }: { activeTab: TechTab, onTabChange: (t: TechTab) => void, onPlus: () => void }) => {
   return (
-    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white border-t border-gray-100 h-20 px-8 flex items-center justify-between z-50 rounded-t-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-      <button className="flex flex-col items-center gap-1 text-blue-600">
-        <Clock className="w-6 h-6" />
-        <span className="text-[10px] font-bold">Hoje</span>
+    <nav className="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-gray-100 h-22 pb-4 px-6 flex items-center justify-between z-50 rounded-t-[40px] shadow-[0_-15px_45px_rgba(0,0,0,0.06)]">
+      <button 
+        onClick={() => onTabChange('home')}
+        className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-14 ${activeTab === 'home' ? 'text-blue-600 scale-105' : 'text-gray-400 opacity-60'}`}
+      >
+        <Clock className={`w-6.5 h-6.5 ${activeTab === 'home' ? 'stroke-[2.5px]' : 'stroke-[2px]'}`} />
+        <span className={`text-[10px] ${activeTab === 'home' ? 'font-black' : 'font-bold'}`}>Hoje</span>
       </button>
-      <button className="flex flex-col items-center gap-1 text-gray-400">
-        <Calendar className="w-6 h-6" />
-        <span className="text-[10px] font-bold">Agenda</span>
+      
+      <button 
+        onClick={() => onTabChange('agenda')}
+        className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-14 ${activeTab === 'agenda' ? 'text-blue-600 scale-105' : 'text-gray-400 opacity-60'}`}
+      >
+        <Calendar className={`w-6.5 h-6.5 ${activeTab === 'agenda' ? 'stroke-[2.5px]' : 'stroke-[2px]'}`} />
+        <span className={`text-[10px] ${activeTab === 'agenda' ? 'font-black' : 'font-bold'}`}>Agenda</span>
       </button>
-      <div className="relative -mt-12">
+      
+      <div className="relative -mt-10">
         <button 
           onClick={onPlus}
-          className="w-14 h-14 bg-blue-600 rounded-2xl shadow-xl shadow-blue-200 flex items-center justify-center text-white active:scale-90 transition-transform"
+          className="w-15 h-15 bg-blue-600 rounded-[22px] shadow-2xl shadow-blue-400 flex items-center justify-center text-white active:scale-90 transition-all hover:bg-blue-700 border-4 border-white"
         >
-          <Plus className="w-7 h-7" />
+          <Plus className="w-8 h-8 stroke-[3px]" />
         </button>
       </div>
-      <button className="flex flex-col items-center gap-1 text-gray-400">
-        <TrendingUp className="w-6 h-6" />
-        <span className="text-[10px] font-bold">Ganhos</span>
+      
+      <button 
+        onClick={() => onTabChange('performance')}
+        className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-14 ${activeTab === 'performance' ? 'text-blue-600 scale-105' : 'text-gray-400 opacity-60'}`}
+      >
+        <TrendingUp className={`w-6.5 h-6.5 ${activeTab === 'performance' ? 'stroke-[2.5px]' : 'stroke-[2px]'}`} />
+        <span className={`text-[10px] ${activeTab === 'performance' ? 'font-black' : 'font-bold'}`}>Ganhos</span>
       </button>
-      <button className="flex flex-col items-center gap-1 text-gray-400">
-        <User className="w-6 h-6" />
-        <span className="text-[10px] font-bold">Perfil</span>
+      
+      <button 
+        onClick={() => onTabChange('profile')}
+        className={`flex flex-col items-center gap-1.5 transition-all duration-300 w-14 ${activeTab === 'profile' ? 'text-blue-600 scale-105' : 'text-gray-400 opacity-60'}`}
+      >
+        <User className={`w-6.5 h-6.5 ${activeTab === 'profile' ? 'stroke-[2.5px]' : 'stroke-[2px]'}`} />
+        <span className={`text-[10px] ${activeTab === 'profile' ? 'font-black' : 'font-bold'}`}>Perfil</span>
       </button>
     </nav>
   );
 };
 
-// Componente de Sidebar para o Shell do Admin
 const Sidebar = ({ isOpen, toggle, onLogout, role }: { isOpen: boolean, toggle: () => void, onLogout: () => void, role: UserRole }) => {
   const location = useLocation();
 
@@ -224,7 +244,6 @@ const Sidebar = ({ isOpen, toggle, onLogout, role }: { isOpen: boolean, toggle: 
   );
 };
 
-// Componente Header
 const Header = ({ onToggleSidebar, onToggleNotifications, onNewOS, role }: { onToggleSidebar: () => void, onToggleNotifications: () => void, onNewOS: () => void, role: UserRole }) => {
   const location = useLocation();
   const noHeaderPaths = ['/landing', '/portal', '/login', '/register', '/tech-app'];
@@ -270,16 +289,14 @@ const MainContent: React.FC<{ authenticated: boolean, setAuthenticated: (val: bo
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [showGlobalOSForm, setShowGlobalOSForm] = useState(false);
+  const [activeTechTab, setActiveTechTab] = useState<TechTab>('home');
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Simular controle de OS Detail
   const [selectedOS, setSelectedOS] = useState<string | null>(null);
 
-  // Redirecionamento e Proteção de Rotas baseada em Role
   useEffect(() => {
     if (authenticated) {
-       // PROTEÇÃO RADICAL PARA CLIENTE: Se for cliente e tentar acessar qualquer rota que não seja /portal ou /landing, joga pra /portal
        if (role === 'client') {
           if (!['/portal', '/landing'].includes(location.pathname)) {
              navigate('/portal', { replace: true });
@@ -287,7 +304,6 @@ const MainContent: React.FC<{ authenticated: boolean, setAuthenticated: (val: bo
           return;
        }
 
-       // Redirecionamentos para outros papéis
        if (role === 'tech' && (location.pathname === '/' || location.pathname === '/login')) {
          navigate('/tech-app', { replace: true });
        } else if (role === 'super_admin' && (location.pathname === '/' || location.pathname === '/login')) {
@@ -309,6 +325,17 @@ const MainContent: React.FC<{ authenticated: boolean, setAuthenticated: (val: bo
 
   const isTechMode = location.pathname === '/tech-app';
 
+  const renderTechContent = () => {
+    if (selectedOS) return <div className="p-4 pt-8"><OSDetail onBack={() => setSelectedOS(null)} /></div>;
+    
+    switch (activeTechTab) {
+      case 'agenda': return <TechAgenda />;
+      case 'performance': return <TechPerformance onClose={() => setActiveTechTab('home')} />;
+      case 'profile': return <TechProfile onLogout={handleLogout} />;
+      default: return <TechMobileDashboard onLogout={handleLogout} onSelectOS={(id) => setSelectedOS(id)} />;
+    }
+  };
+
   return (
     <div className="min-h-screen flex bg-gray-50">
       <Sidebar 
@@ -323,14 +350,12 @@ const MainContent: React.FC<{ authenticated: boolean, setAuthenticated: (val: bo
         onClose={() => setNotificationsOpen(false)} 
       />
 
-      {/* Modal Global para Criar OS */}
       {showGlobalOSForm && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
            <div className="w-full max-w-3xl max-h-[90vh] overflow-hidden">
               <ServiceOrderForm 
                 onClose={() => setShowGlobalOSForm(false)} 
                 onSave={(data) => {
-                  console.log('OS Salva:', data);
                   setShowGlobalOSForm(false);
                 }} 
               />
@@ -352,22 +377,17 @@ const MainContent: React.FC<{ authenticated: boolean, setAuthenticated: (val: bo
             <Route path="/register" element={<Register onToggle={() => navigate('/login')} onRegister={() => { setRole('admin'); setAuthenticated(true); navigate('/'); }} />} />
             <Route path="/landing" element={<LandingPage />} />
             
-            {/* Rota Mobile para Técnico com Shell Mobile-First */}
             <Route path="/tech-app" element={
                <div className="flex-1 flex flex-col relative">
-                  <div className={`flex-1 overflow-y-auto custom-scrollbar ${!selectedOS ? 'pb-24' : ''}`}>
+                  <div className={`flex-1 overflow-y-auto custom-scrollbar ${!selectedOS ? 'pb-28' : ''}`}>
                     <div className="max-w-md mx-auto min-h-full bg-gray-50 shadow-sm border-x border-gray-100">
-                      {selectedOS 
-                        ? <div className="p-4 pt-8"><OSDetail onBack={() => setSelectedOS(null)} /></div>
-                        : <TechMobileDashboard onLogout={handleLogout} onSelectOS={(id) => setSelectedOS(id)} />
-                      }
+                      {renderTechContent()}
                     </div>
                   </div>
-                  {!selectedOS && <TechBottomNav onPlus={() => setShowGlobalOSForm(true)} />}
+                  {!selectedOS && <TechBottomNav activeTab={activeTechTab} onTabChange={setActiveTechTab} onPlus={() => setShowGlobalOSForm(true)} />}
                </div>
             } />
 
-            {/* Portal do Cliente - Acessível para papel 'client' */}
             <Route path="/portal" element={
               <div className="bg-gray-50 min-h-screen">
                 <div className="bg-white border-b border-gray-100 p-4 sticky top-0 z-50">
@@ -387,7 +407,6 @@ const MainContent: React.FC<{ authenticated: boolean, setAuthenticated: (val: bo
               </div>
             } />
 
-            {/* Rotas Privadas (Admin/Gestor) - Bloqueadas para papel 'client' no MainContent logic */}
             {role !== 'client' && (
               <>
                 <Route path="/super-admin" element={<div className="p-4 lg:p-8"><SuperAdminDashboard /></div>} />
@@ -431,7 +450,6 @@ const MainContent: React.FC<{ authenticated: boolean, setAuthenticated: (val: bo
         </div>
       </main>
 
-      {/* Global AI Copilot */}
       {authenticated && role !== 'client' && <AICopilot />}
     </div>
   );
