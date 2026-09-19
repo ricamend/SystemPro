@@ -1,19 +1,26 @@
-
 {
   "name": "servico-pro-saas",
   "version": "1.0.0",
   "description": "Plataforma SaaS Multi-tenant para Gestão de Ordens de Serviço com IA.",
   "main": "index.tsx",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "vite build",
+    "preview": "vite preview"
+  },
   "dependencies": {
+    "@google/genai": "^1.39.0",
+    "jspdf": "^2.5.1",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^0.563.0",
+    "qrcode": "^1.5.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "lucide-react": "^0.563.0",
-    "recharts": "^3.7.0",
     "react-router-dom": "^7.13.0",
-    "leaflet": "^1.9.4",
-    "jspdf": "^2.5.1",
-    "qrcode": "^1.5.3",
-    "@google/genai": "^1.39.0"
+    "recharts": "^3.7.0",
+    "zod": "^4.6.2"
   },
   "keywords": [
     "saas",
@@ -23,5 +30,13 @@
     "management"
   ],
   "author": "ServiçoPro Team",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/leaflet": "^1.9.22",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "vite": "^8.3.0"
+  }
 }

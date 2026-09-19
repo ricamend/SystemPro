@@ -1,5 +1,5 @@
 
-import { z } from 'https://esm.sh/zod@^3.24.2';
+import { z } from 'zod';
 
 export const customerSchema = z.object({
   name: z.string().min(3, 'Nome deve ter pelo menos 3 caracteres'),
